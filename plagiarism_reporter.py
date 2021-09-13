@@ -70,7 +70,8 @@ for element in raw_data[4:]:
         'additional_1'      : components[5],
         'additional_2'      : components[6]
          }
-    cases.append(case)
+    if case['sid'].isdigit():
+        cases.append(case)
 
 
 # Check if the reason is in this list
@@ -87,9 +88,12 @@ possible_reasons = [
 ]
 for case in cases:
     if case['reason'] not in possible_reasons:
-        print("Inappropriate reason given: ", case['reason'])
-        print(possible_reasons)
-        exit()      
+        if case['reason'].isdigit():
+            case['reason'] = possible_reasons[int(case['reason'])]
+        else:
+            print("Inappropriate reason given: ", case['reason'])
+            print(possible_reasons)
+            exit()      
 
 # except:
 #     print("Data Format Error in CSV")
@@ -173,6 +177,9 @@ wait(big_sleep)
 
 for id, case in enumerate(cases):
 
+    if (0 == len(case['sid'])): # In case of empty row
+        continue 
+
     active_element =  driver.find_element_by_xpath('//*[@id="MainContent_rptrStudentList_ddAllegedConduct_{id}"]'.format(id=id))
     selector = selenium.webdriver.support.select.Select(active_element)
     selector.select_by_visible_text(case['reason'])
@@ -192,7 +199,7 @@ for id, case in enumerate(cases):
     wait(small_sleep)
 
 # Just to load it once and change the context
-file_element(driver, '//*[@id="MainContent_rptrStudentList2_uplAssessment_0"]'.format(id=id),'')
+file_element(driver, '//*[@id="MainContent_rptrStudentList2_uplAssessment_0"]'.format(id=id), case['student_assessment'])
 
 # No sleeps needed here?
 wait(small_sleep)
